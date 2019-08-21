@@ -291,9 +291,8 @@ function coerceValue(options) {
     switch (data_type) {
     case 'String':
       return (typeof value === 'string') ? value : String(value);
-    case 'Number':
-      if (typeof value === 'string') value = value.replace(/\D/g, '');    
-      return (Number(value) && !isNaN(Number(value))) ? Number(value) : value;
+    case 'Number': 
+      return (value && !isNaN(Number(value))) ? Number(value) : value;
     case 'Boolean':
       if (typeof value === 'string' && value.toLowerCase() === 'true') {
         value = true;
