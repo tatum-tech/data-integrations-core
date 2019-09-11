@@ -169,7 +169,7 @@ async function decryptSecurityCert(options) {
   const otherdocs = otherDocsFolderExists ? require('./otherdocs') : null;
   const credentials = otherDocsFolderExists ? otherdocs.credentials : null;
   const { accessKeyId, accessKey, region, } = testEnv && otherDocsFolderExists ? credentials.client : periodic.settings.extensions[ 'periodicjs.ext.packagecloud' ].client;
-  const encryption_key = testEnv && otherDocsFolderExists ? credentials.encryption_key_path : periodic.settings.extensions[ '@digifi/periodicjs.ext.reactapp' ].encryption_key_path;
+  const encryption_key = testEnv && otherDocsFolderExists ? credentials.encryption_key_path : periodic.settings.extensions[ '@digifi-los/reactapp' ].encryption_key_path;
   const s3 = new AWS.S3({ accessKeyId, secretAccessKey: accessKey, region, });
   const decipher = crypto.createDecipher(client_encryption_algo, encryption_key);
   let params = { Bucket, Key, Expires: 60, };
