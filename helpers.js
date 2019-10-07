@@ -125,15 +125,35 @@ async function promisifyCustomXMLParser(response, xmlParserConfigs) {
 async function customResponseParser(options) {
   let { segment, response, status, responseTraversalPath, dataintegration} = options;
   let api_response;
+  const xmlParserConfigs = (dataintegration && dataintegration.xml_parser_configs)? dataintegration.xml_parser_configs : {
+    explicitArray: false,
+    attrkey: '@',
+  };
   if (typeof response === 'string') {
     try {
       api_response = JSON.parse(response);
     } catch (e) {
-      let xmlParserConfigs = (dataintegration && dataintegration.xml_parser_configs)? dataintegration.xml_parser_configs : {
-        explicitArray: false,
-        attrkey: '@',
-      };
       api_response = await promisifyCustomXMLParser(response, xmlParserConfigs);
+    }
+    if (dataintegration && dataintegration.raw_data_parse && dataintegration.raw_data_traversal_path && api_response) {
+      const traversalPath = dataintegration.raw_data_traversal_path.split('.');
+      let prevPointer = api_response;
+      for (let i = 0; i < traversalPath.length; i++) {
+        const pathVal = traversalPath[i];
+        const nextVal = prevPointer[pathVal];
+        if (nextVal === undefined) break;
+        if (i === traversalPath.length - 1) {
+          let rawDataPointer = null;
+          try {
+            rawDataPointer = JSON.parse(nextVal);
+          } catch(e) {
+            rawDataPointer = await promisifyCustomXMLParser(nextVal, xmlParserConfigs);
+          }
+          prevPointer[pathVal] = rawDataPointer;
+          break;
+        }
+        prevPointer = nextVal;
+      }
     }
   } else {
     api_response = response;
