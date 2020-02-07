@@ -6,6 +6,7 @@ const moment = require('moment');
 const periodic = testEnv ? null : require('periodicjs');
 const logger = testEnv ? { silly: () => { }, } : periodic.logger;
 const convertjson2xml = require('convertjson2xml');
+const xml2js = require('xml2js');
 const flat = require('flat');
 const fs = require('fs');
 const urlencode = require('urlencode');
@@ -33,14 +34,23 @@ function createBodyXML(options) {
       }
     });
   }
-  json2xml = convertjson2xml.config(dataintegration.xml_configs || {
-    'trim' : true,
-    'hideUndefinedTag' : true,
-    'nullValueTag' : 'full',
-    'emptyStringTag' : 'full',
-    'rootTag' : 'requestTag' // should be the root tag of the valid xml that is sent to the 3rd party provider
-  });
-  return json2xml(body);
+
+  if (dataintegration.xml_library === 'xml2js') {
+    const builder = new xml2js.Builder(dataintegration.xml_configs || { 
+      "attrkey": '@', 
+      "rootName" : "requestTag" 
+    });
+    return builder.buildObject(body);
+  } else {
+    json2xml = convertjson2xml.config(dataintegration.xml_configs || {
+      'trim' : true,
+      'hideUndefinedTag' : true,
+      'nullValueTag' : 'full',
+      'emptyStringTag' : 'full',
+      'rootTag' : 'requestTag' // should be the root tag of the valid xml that is sent to the 3rd party provider
+    });
+    return json2xml(body);
+  }
 }
 
 function createJSONBody(options) {
