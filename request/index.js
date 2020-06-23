@@ -20,7 +20,8 @@ let json2xml;
  */
 function createBodyXML(options) {
   let { inputs, dataintegration, strategy_status } = options;
-  let body = (strategy_status === 'active' && dataintegration.active_default_configuration) ? dataintegration.active_default_configuration : dataintegration.default_configuration
+  let body = helpers.getXMLBodyTemplate(dataintegration, strategy_status);
+
   if (dataintegration.inputs) {    
     dataintegration.inputs.forEach(config => {
       if (config.traversal_path) {

@@ -238,6 +238,20 @@ async function decryptSecurityCert(options) {
 // CUSTOM HELPERS
 
 /**
+ * Get template object to be used for XML POST body structure creation
+ * @param {Object} dataIntegration
+ * @param {String} strategyStatus
+ * @return {Object} Returns object with future structure of XML body
+ */
+function getXMLBodyTemplate(dataIntegration, strategyStatus) {
+  if (strategyStatus === 'active' && dataIntegration.active_default_configuration) {
+    return dataIntegration.active_default_configuration;
+  }
+
+  return dataIntegration.default_configuration || {};
+}
+
+/**
  * Traverse a given object.
  * @param {Object} obj Object to be traversed.
  * @param {String} traversePath Path to follow.
@@ -355,6 +369,7 @@ module.exports = {
   getInputs,
   getOutputs,
   getPathname,
+  getXMLBodyTemplate,
   formatInputValue,
   customResponseParser,
   decryptSecurityCert,
