@@ -107,6 +107,31 @@ describe('Helper functions', () => {
       expect(bodyTemplate).to.be.an('object').and.be.empty;
     });
   });
+  describe('generateDynamicQueryString', () => {
+    it('formats custom query using inputs', () => {
+      const query = helpers.generateDynamicQueryString({name: 'Replace'}, {name: 'Test'});
+
+      expect(query).to.be.eql('name=Replace');
+    });
+    it('uses default query param value if there is no input for that param', () => {
+      const query = helpers.generateDynamicQueryString({}, {name: 'Test'});
+
+      expect(query).to.be.eql('name=Test');
+    });
+    it('urlencodes inputs', () => {
+      const query = helpers.generateDynamicQueryString({}, {name: 'Test Name'});
+
+      expect(query).to.be.eql('name=Test%20Name');
+    });
+    it('skips null, empty string, undefined inputs without default query param value', () => {
+      const query = helpers.generateDynamicQueryString(
+        {},
+        { name: '', surname: undefined, address: null, test: false, count: 0 },
+      );
+
+      expect(query).to.be.eql('test=false&count=0');
+    });
+  });
   describe('traverse', () => {
     it('traverses an object based on string path provided', () => {
       let obj = {

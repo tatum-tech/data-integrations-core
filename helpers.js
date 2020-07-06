@@ -11,6 +11,7 @@ const periodic = testEnv ? null : require('periodicjs');
 const logger = testEnv ? { silly: () => { }, } : periodic.logger;
 const AWS = require('aws-sdk');
 const URL = require('url').URL;
+const urlencode = require('urlencode');
 const path = require('path');
 const moment = require('moment');
 const VMParser = require('./parser');
@@ -251,6 +252,23 @@ function getXMLBodyTemplate(dataIntegration, strategyStatus) {
   return dataIntegration.default_configuration || {};
 }
 
+function generateDynamicQueryString(inputs, queryParams, urlEncodeFormat = 'utf-8') {
+  try {
+    return Object.keys(queryParams).reduce((acc, queryKey) => {
+      let queryVal = (inputs[queryKey] !== undefined) ? inputs[queryKey] : queryParams[queryKey];
+
+      if (queryVal || queryVal === false || typeof queryVal === 'number') {
+        queryVal = urlencode(queryVal, urlEncodeFormat);
+        acc.push(`${queryKey}=${queryVal}`);
+      }
+
+      return acc;
+    }, []).join('&');
+  } catch(e) {
+    return `error=${e.message}`;
+  }
+}
+
 /**
  * Traverse a given object.
  * @param {Object} obj Object to be traversed.
@@ -370,6 +388,7 @@ module.exports = {
   getOutputs,
   getPathname,
   getXMLBodyTemplate,
+  generateDynamicQueryString,
   formatInputValue,
   customResponseParser,
   decryptSecurityCert,

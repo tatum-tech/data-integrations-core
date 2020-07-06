@@ -9,7 +9,6 @@ const convertjson2xml = require('convertjson2xml');
 const xml2js = require('xml2js');
 const flat = require('flat');
 const fs = require('fs');
-const urlencode = require('urlencode');
 const path = require('path');
 let json2xml;
 
@@ -82,19 +81,6 @@ function createJSONBody(options) {
   return Object.assign({}, default_configuration, inputs);
 }
 
-const generateDynamicQueryString = (inputs, queryParams, urlEncodeFormat) => {
-  try {
-    return Object.keys(queryParams).reduce((acc, queryKey) => {
-      let queryVal = (inputs[queryKey] !== undefined) ? inputs[queryKey] : queryParams[queryKey];
-      queryVal = urlencode(queryVal, urlEncodeFormat);
-      acc.push(`${queryKey}=${queryVal}`);
-      return acc;
-    }, []).join('&');
-  } catch(e) {
-    return `error=${e.message}`;
-  }
-}
-
 /**
  * Dynamic request parser
  * @param {Object} options Contains dataintegration mongo document and state.
@@ -132,7 +118,7 @@ async function parser(options) {
   }
 
   if (dataintegration.custom_query_params) {
-    const dynamicQueryString = generateDynamicQueryString(inputs, dataintegration.custom_query_params, dataintegration.url_encode_format || 'utf-8');
+    const dynamicQueryString = helpers.generateDynamicQueryString(inputs, dataintegration.custom_query_params, dataintegration.url_encode_format);
     request_options.path += `?${dynamicQueryString}`;
   }
 
