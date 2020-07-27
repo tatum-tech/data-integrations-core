@@ -382,6 +382,19 @@ function getInputs(options) {
   }, {});
 }
 
+function changeRequestOptionsByInputs(options) {
+  const { inputs, request_options } = options;
+  const { path_variable, request_bearer_token } = inputs;
+
+  if (path_variable) {
+    request_options.path = `${request_options.path}/${inputs[path_variable]}`;
+  }
+
+  if (request_bearer_token && request_options.headers) {
+    request_options.headers['Authorization'] = `Bearer ${request_bearer_token}`;
+  }
+}
+
 module.exports = {
   fetch,
   getInputs,
@@ -395,4 +408,5 @@ module.exports = {
   promisifyCustomXMLParser,
   traverse,
   bufferToStream,
+  changeRequestOptionsByInputs,
 };

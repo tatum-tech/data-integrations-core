@@ -97,7 +97,11 @@ async function parser(options) {
 
   // set dataintegration request options based on active or testing
   let request_options = (strategy_status === 'active' && dataintegration.active_request_options) ? dataintegration.active_request_options : dataintegration.request_options;
-  if (inputs && inputs.path_variable) request_options.path = request_options.path + '/' + inputs[ inputs.path_variable ];
+
+  if (inputs) {
+    helpers.changeRequestOptionsByInputs({ inputs, request_options });
+  }
+
   let response_options = dataintegration.response_option_configs || {};
 
   body = dataintegration.stringify ? JSON.stringify(body) : body;
