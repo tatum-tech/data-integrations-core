@@ -78,23 +78,25 @@ function traverse(obj, traversePath) {
 }
 
 /**
- * Returns pathname with params replaced with actual values and any optional params stripped out.
+ * Returns path with params replaced with actual values.
  * 
- * @param {Object} options Contains pathname and body.
- * @return {String} Returns path.
+ * @param {String} path with templates /:example/
+ * @param {Object} inputs inputs to use values from
+ *
+ * @return {String} Returns path with templates replased with input values.
  * 
  */
-function getPathname(options) {
-  let { pathname, body, } = options;
-  pathname = Object.keys(body).reduce((newPath, key) => {
-    let params = new RegExp(`:${key}`, 'g');
-    if (pathname.match(params)) {
-      newPath = newPath.replace(params, encodeURIComponent(body[ key ]));
-      delete body[ key ];
+function generateDynamicPath(path, inputs) {
+  return Object.keys(inputs).reduce((newPath, key) => {
+    const params = new RegExp(`:${key}`, 'g');
+
+    if (newPath.match(params)) {
+      newPath = newPath.replace(params, encodeURIComponent(inputs[key]));
+      delete inputs[key];
     }
+
     return newPath;
-  }, pathname);
-  return pathname.split('?')[ 0 ] + '?' + pathname.split('?').slice(1).join('?').split('&').filter(i => i.split('=:')[ 0 ] !== i.split('=:')[ 1 ]).join('&');
+  }, path);
 }
 
 /**
@@ -386,6 +388,8 @@ function changeRequestOptionsByInputs(options) {
   const { inputs, request_options } = options;
   const { path_variable, request_bearer_token } = inputs;
 
+  request_options.path = generateDynamicPath(request_options.path, inputs);
+
   if (path_variable) {
     request_options.path = `${request_options.path}/${inputs[path_variable]}`;
   }
@@ -399,7 +403,7 @@ module.exports = {
   fetch,
   getInputs,
   getOutputs,
-  getPathname,
+  generateDynamicPath,
   getXMLBodyTemplate,
   generateDynamicQueryString,
   formatInputValue,
