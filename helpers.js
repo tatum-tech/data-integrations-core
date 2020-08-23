@@ -185,11 +185,13 @@ function bufferToStream(source) {
  * @return {Object} Returns stream.
  */
 async function decryptSecurityCert(options) {
+  console.log('HERE! - decryptSecurityCert')
   let { filename, dir, Bucket, Key, client_encryption_algo, } = options;
   let otherDocsFolderExists = fs.existsSync(path.join(__dirname, 'otherdocs'));
   const otherdocs = otherDocsFolderExists ? require('./otherdocs') : null;
   const credentials = otherDocsFolderExists ? otherdocs.credentials : null;
   const { accessKeyId, accessKey, region, } = testEnv && otherDocsFolderExists ? credentials.client : periodic.settings.extensions[ 'periodicjs.ext.packagecloud' ].client;
+  console.log('accessKeyId, accessKey, region: ', accessKeyId, accessKey, region)
   const encryption_key = testEnv && otherDocsFolderExists ? credentials.encryption_key_path : periodic.settings.extensions[ '@digifi-los/reactapp' ].encryption_key_path;
   const s3 = new AWS.S3({ accessKeyId, secretAccessKey: accessKey, region, });
   const decipher = crypto.createDecipher(client_encryption_algo, encryption_key);
