@@ -17,6 +17,9 @@
     "url": "https://github.com/digifi-io/data-integrations-core/issues"
   },
   "homepage": "https://github.com/digifi-io/data-integrations-core#readme",
+  "precommit": [
+    "build"
+  ],
   "dependencies": {
     "aws-sdk": "^2.236.1",
     "convertjson2xml": "^0.1.11",
