@@ -216,18 +216,27 @@ describe('Helper functions', () => {
       expect(outputs).to.be.deep.equal(result);
     });
   });
-  describe('getPathname', () => {
-    it('replaces params and queries', () => {
-      let pathname = 'www.exampleurl.com/:id/:date?a=:a&b=:b&c=:c';
-      let body = {
+  describe('generateDynamicPath', () => {
+    it('replaces templates in path', () => {
+      const path = 'www.exampleurl.com/:id/:date';
+      const inputs = {
         id: 123,
         date: '2019',
-        a: true,
-        b: 'json',
       };
-      let newURL = helpers.getPathname({ pathname, body, });
-      let result = 'www.exampleurl.com/123/2019?a=true&b=json';
+
+      const newURL = helpers.generateDynamicPath(path, inputs);
+      const result = 'www.exampleurl.com/123/2019';
+
       expect(newURL).to.be.equal(result);
+    });
+
+    it('not replaces templates if there is no such input', () => {
+      const path = 'www.exampleurl.com/:id/:date';
+      const inputs = {};
+
+      const newURL = helpers.generateDynamicPath(path, inputs);
+
+      expect(newURL).to.be.equal(path);
     });
   });
   describe('bufferToStream', () => {

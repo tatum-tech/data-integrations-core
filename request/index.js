@@ -8,6 +8,7 @@ const logger = testEnv ? { silly: () => { }, } : periodic.logger;
 const convertjson2xml = require('convertjson2xml');
 const xml2js = require('xml2js');
 const flat = require('flat');
+const urlencode = require('urlencode');
 const fs = require('fs');
 const path = require('path');
 let json2xml;
@@ -53,6 +54,16 @@ function createBodyXML(options) {
   }
 }
 
+const getFormattedRequestJSONBody = ({ dataintegration, body }) => {
+  if (!dataintegration.formatRequestJSONBody) {
+    return body;
+  }
+
+  const formatRequest = new Function('body', dataintegration.formatRequestJSONBody);
+
+  return formatRequest.call(null, body);
+}
+
 function createJSONBody(options) {
   let { inputs, dataintegration, strategy_status } = options;
   if (inputs && dataintegration.inputs) {
@@ -77,8 +88,29 @@ function createJSONBody(options) {
     })
   }
 
-  const default_configuration = (strategy_status === 'active' && dataintegration.active_default_configuration) ? dataintegration.active_default_configuration : dataintegration.default_configuration
-  return Object.assign({}, default_configuration, inputs);
+  const default_configuration = (strategy_status === 'active' && dataintegration.active_default_configuration)
+    ? dataintegration.active_default_configuration
+    : dataintegration.default_configuration;
+
+  return getFormattedRequestJSONBody({ dataintegration, body: Object.assign({}, default_configuration, inputs) });
+}
+
+const getRequestBody = ({ dataintegration, inputs, strategy_status }) => {
+  if (dataintegration.request_type === 'xml') {
+    return createBodyXML({ inputs, dataintegration, strategy_status });
+  }
+
+  if (dataintegration.request_type === 'json') {
+    return createJSONBody({ inputs, dataintegration, strategy_status });
+  }
+
+  if (dataintegration.request_type === 'form-urlencoded') {
+    const body = createJSONBody({ inputs, dataintegration, strategy_status });
+
+    return urlencode.stringify(body);
+  }
+
+  return null;
 }
 
 /**
@@ -91,9 +123,8 @@ async function parser(options) {
   const strategy_status = state.strategy_status || 'testing';
   let dir, filename;
   let inputs = helpers.getInputs(options);
-  let body = (dataintegration.request_type === 'xml')
-    ? createBodyXML({ inputs, dataintegration, strategy_status })
-    : createJSONBody({ inputs, dataintegration, strategy_status });
+
+  let body = getRequestBody({ inputs, dataintegration, strategy_status });
 
   // set dataintegration request options based on active or testing
   let request_options = (strategy_status === 'active' && dataintegration.active_request_options) ? dataintegration.active_request_options : dataintegration.request_options;
