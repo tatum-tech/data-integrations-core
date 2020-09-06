@@ -8,6 +8,7 @@ const logger = testEnv ? { silly: () => { }, } : periodic.logger;
 const convertjson2xml = require('convertjson2xml');
 const xml2js = require('xml2js');
 const flat = require('flat');
+const unflatten = require('flat').unflatten;
 const urlencode = require('urlencode');
 const fs = require('fs');
 const path = require('path');
@@ -66,33 +67,31 @@ const getFormattedRequestJSONBody = ({ dataintegration, body }) => {
 
 function createJSONBody(options) {
   let { inputs, dataintegration, strategy_status } = options;
-  if (inputs && dataintegration.inputs) {
-    dataintegration.inputs.forEach(config => {
-      if (config.traversal_path) {
-        let traversal_arr = config.traversal_path.split('.');
-        let current_body = inputs;
-        for (let i = 0; i < traversal_arr.length - 1; i++) {
-          let elmnt = traversal_arr[ i ];
-          current_body = current_body[elmnt];
-        }
-        current_body[ traversal_arr[ traversal_arr.length - 1 ] ] = helpers.formatInputValue({ name: config.input_name, config, inputs, });
-      } else {
-        inputs[ config.input_name ] = helpers.formatInputValue({ name: config.input_name, config, inputs, });
-      }
-    })
-  }
 
-  if (dataintegration.custom_inputs) {
-    dataintegration.custom_inputs.forEach(config => {
-      inputs[ config.name ] = helpers.formatInputValue({ name: config.name, config, inputs: dataintegration.custom_inputs, });
-    })
-  }
-
-  const default_configuration = (strategy_status === 'active' && dataintegration.active_default_configuration)
+  let default_configuration = (strategy_status === 'active' && dataintegration.active_default_configuration)
     ? dataintegration.active_default_configuration
     : dataintegration.default_configuration;
 
-  return getFormattedRequestJSONBody({ dataintegration, body: Object.assign({}, default_configuration, inputs) });
+  let flat_default_confirguration = flat(default_configuration); 
+
+  if (inputs && dataintegration.inputs) {
+    dataintegration.inputs.forEach(config => {
+      if (config.traversal_path) {
+        flat_default_confirguration[config.traversal_path] = inputs[config.input_name]
+      }
+        // inputs[ config.input_name ] = helpers.formatInputValue({ name: config.input_name, config, inputs, });
+    })
+  }
+
+  default_configuration = unflatten(flat_default_confirguration);
+
+  // if (dataintegration.custom_inputs) {
+  //   dataintegration.custom_inputs.forEach(config => {
+  //     inputs[ config.name ] = helpers.formatInputValue({ name: config.name, config, inputs: dataintegration.custom_inputs, });
+  //   })
+  // }
+
+  return getFormattedRequestJSONBody({ dataintegration, body: default_configuration });
 }
 
 const getRequestBody = ({ dataintegration, inputs, strategy_status }) => {
