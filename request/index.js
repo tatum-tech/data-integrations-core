@@ -1,4 +1,4 @@
-'use strict';
+(function (exports, require, module, __filename, __dirname) { 'use strict';
 
 const testEnv = process.env.NODE_ENV === 'test';
 const helpers = require('../helpers');
@@ -148,7 +148,17 @@ async function parser(options) {
   if (dataintegration.request_option_configs) {
     let requestOptionConfigs = dataintegration.request_option_configs;
     if (requestOptionConfigs.set_content_length && request_options && request_options.headers) request_options.headers[ 'Content-Length' ] = Buffer.byteLength(body);
-    if (requestOptionConfigs.pfx && request_options) request_options.pfx = fs.readFileSync(path.resolve(dir, filename));
+    if (requestOptionConfigs.clientId && requestOptionConfigs.clientSecret && request_options) {
+      let user = requestOptionConfigs.clientId;
+      let password = requestOptionConfigs.clientSecret;
+
+      let base64encodedData = Buffer.from(user + ':' + password).toString('base64');
+
+      request_options.headers['Authorization'] = 'Basic ' + base64encodedData
+    }
+    if (requestOptionConfigs.tokenInputVariable && request_options)  {
+      request_options.headers['Authorization'] = 'Bearer ' + (inputs[requestOptionConfigs.tokenInputVariable] || '')
+    }
   }
 
   if (dataintegration.custom_query_params) {
@@ -165,3 +175,4 @@ async function parser(options) {
 }
 
 module.exports = parser;
+});

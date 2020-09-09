@@ -24,14 +24,27 @@ const VMParser = require('./parser');
  * 
  */
 function fetch(options) {
-  const { requestOptions, body, timeout, responseOptions = {} } = options;
+  const {  body, timeout, responseOptions = {}, requestOptions } = options;
+
   requestOptions.method = requestOptions.method ? requestOptions.method.toUpperCase() : 'GET';
+
   const STATUS_REGEXP = /^(2|3)\d{2}$/;
+
   let requestTimeout;
+
   try {
     let response = [];
+
+    var _options = {
+      'method': requestOptions.method,
+      'hostname': requestOptions.hostname,
+      'path': requestOptions.path,
+      'headers': requestOptions.headers,
+      'maxRedirects': 20
+    };
+
     return new Promise((resolve, reject) => {
-      let req = https.request(requestOptions, res => {
+      let req = https.request(_options, res => {
         let status = res.statusCode.toString();
         if (!STATUS_REGEXP.test(status) || (!responseOptions.skip_status_message_check && typeof res.statusMessage === 'string' && res.statusMessage.toUpperCase() !== 'OK')) {
           if (requestTimeout) clearTimeout(requestTimeout);
