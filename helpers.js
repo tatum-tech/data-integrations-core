@@ -51,7 +51,10 @@ async function fetch(options) {
     return await axios(config)
       .then(function (response) {
         console.log(response);
-        return response.data;
+        return {
+          response: response.data,
+          status: response.status
+        };
       })
       .catch(function (error) {
         console.log(error);
