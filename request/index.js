@@ -149,12 +149,17 @@ async function parser(options) {
     let requestOptionConfigs = dataintegration.request_option_configs;
     if (requestOptionConfigs.set_content_length && request_options && request_options.headers) request_options.headers[ 'Content-Length' ] = Buffer.byteLength(body);
     if (requestOptionConfigs.clientId && requestOptionConfigs.clientSecret && request_options) {
-      let user = requestOptionConfigs.clientId;
-      let password = requestOptionConfigs.clientSecret;
+      // let user = requestOptionConfigs.clientId;
+      // let password = requestOptionConfigs.clientSecret;
 
-      let base64encodedData = Buffer.from(user + ':' + password).toString('base64');
+      // let base64encodedData = Buffer.from(user + ':' + password).toString('base64');
 
-      request_options.headers['Authorization'] = 'Basic ' + base64encodedData
+      // request_options.headers['Authorization'] = 'Basic ' + base64encodedData
+      request_options.auth = {
+        username: requestOptionConfigs.clientId,
+        password: requestOptionConfigs.clientSecret,
+      };
+      
     }
     if (requestOptionConfigs.tokenInputVariable && request_options)  {
       request_options.headers['Authorization'] = 'Bearer ' + (inputs[requestOptionConfigs.tokenInputVariable] || '')
@@ -162,8 +167,9 @@ async function parser(options) {
   }
 
   if (dataintegration.custom_query_params) {
-    const dynamicQueryString = helpers.generateDynamicQueryString(inputs, dataintegration.custom_query_params, dataintegration.url_encode_format);
-    request_options.path += `?${dynamicQueryString}`;
+    // const dynamicQueryString = helpers.generateDynamicQueryString(inputs, dataintegration.custom_query_params, dataintegration.url_encode_format);
+    // request_options.path += `?${dynamicQueryString}`;
+    request_options.params = custom_query_params;
   }
 
   return {

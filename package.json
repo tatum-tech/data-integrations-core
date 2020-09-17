@@ -22,6 +22,7 @@
   ],
   "dependencies": {
     "aws-sdk": "^2.236.1",
+    "axios": "^0.20.0",
     "convertjson2xml": "^0.1.11",
     "flat": "^4.1.0",
     "fs-extra": "^6.0.1",

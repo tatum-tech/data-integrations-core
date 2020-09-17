@@ -2,6 +2,7 @@
 
 const testEnv = process.env.NODE_ENV === 'test';
 const https = require('https');
+const axios = require('axios');
 const xml2js = require('xml2js');
 const { parseNumbers, parseBooleans, } = xml2js.processors;
 const { Duplex, } = require('stream');
@@ -23,55 +24,68 @@ const VMParser = require('./parser');
  * @return {Object} Returns response.
  * 
  */
-function fetch(options) {
+async function fetch(options) {
   const {  body, timeout, responseOptions = {}, requestOptions } = options;
 
   requestOptions.method = requestOptions.method ? requestOptions.method.toUpperCase() : 'GET';
 
   const STATUS_REGEXP = /^(2|3)\d{2}$/;
 
-  let requestTimeout;
+  // let requestTimeout;
 
   try {
-    let response = [];
+    // let response = [];
 
-    var _options = {
-      'method': requestOptions.method,
-      'hostname': requestOptions.hostname,
-      'path': requestOptions.path,
-      'headers': requestOptions.headers,
-      'maxRedirects': 20
+    var config = {
+      method: requestOptions.method,
+      url: `https://${requestOptions.hostname}${requestOptions.path}`,
+      data: body || '',
+      auth: requestOptions.auth || '',
+      headers: requestOptions.headers || '',
+      params: requestOptions.params || ''
     };
 
-    return new Promise((resolve, reject) => {
-      let req = https.request(_options, res => {
-        let status = res.statusCode.toString();
-        if (!STATUS_REGEXP.test(status) || (!responseOptions.skip_status_message_check && typeof res.statusMessage === 'string' && res.statusMessage.toUpperCase() !== 'OK')) {
-          if (requestTimeout) clearTimeout(requestTimeout);
-          reject(Object.assign(new Error(res.statusMessage), { status, }));
-        } else {
-          res.on('data', chunk => response.push(chunk));
-          res.on('error', e => {
-            if (requestTimeout) clearTimeout(requestTimeout);
-            reject(e);
-          });
-          res.on('end', () => {
-            if (requestTimeout) clearTimeout(requestTimeout);
-            resolve({ response: Buffer.concat(response).toString(), status, });
-          });
-        }
+    console.log('config ', config)
+
+    return await axios(config)
+      .then(function (response) {
+        console.log(response);
+        return response.data;
+      })
+      .catch(function (error) {
+        console.log(error);
+        return error;
       });
-      req.on('error', reject);
-      if (requestOptions.method === 'POST') req.write(body);
-      req.end();
-      if (typeof timeout === 'number') {
-        requestTimeout = setTimeout(() => {
-          clearTimeout(requestTimeout);
-          req.abort();
-          reject(new Error(`Request to ${requestOptions.hostname}${requestOptions.path} was aborted`));
-        }, timeout);
-      }
-    });
+
+    // return new Promise((resolve, reject) => {
+    //   let req = https.request(_options, res => {
+    //     let status = res.statusCode.toString();
+    //     if (!STATUS_REGEXP.test(status) || (!responseOptions.skip_status_message_check && typeof res.statusMessage === 'string' && res.statusMessage.toUpperCase() !== 'OK')) {
+    //       if (requestTimeout) clearTimeout(requestTimeout);
+    //       reject(Object.assign(new Error(res.statusMessage), { status, }));
+    //     } else {
+    //       res.on('data', chunk => response.push(chunk));
+    //       res.on('error', e => {
+    //         if (requestTimeout) clearTimeout(requestTimeout);
+    //         reject(e);
+    //       });
+    //       res.on('end', () => {
+    //         if (requestTimeout) clearTimeout(requestTimeout);
+    //         resolve({ response: Buffer.concat(response).toString(), status, });
+    //       });
+    //     }
+    //   });
+    //   req.on('error', reject);
+    //   if (requestOptions.method === 'POST') req.write(body);
+    //   req.end();
+    //   if (typeof timeout === 'number') {
+    //     requestTimeout = setTimeout(() => {
+    //       clearTimeout(requestTimeout);
+    //       req.abort();
+    //       reject(new Error(`Request to ${requestOptions.hostname}${requestOptions.path} was aborted`));
+    //     }, timeout);
+    //   }
+    // });
   } catch (e) {
     return e;
   }
