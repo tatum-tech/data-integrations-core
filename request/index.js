@@ -162,7 +162,7 @@ async function parser(options) {
       
     }
     if (requestOptionConfigs.tokenInputVariable && request_options)  {
-      request_options.headers['Authorization'] = 'Bearer ' + (inputs[requestOptionConfigs.tokenInputVariable] || '')
+      request_options.headers['Authorization'] = 'Bearer ' + (state.dataintegration_variables[tokenInputVariable] || '');
     }
   }
 
