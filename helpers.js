@@ -3,6 +3,7 @@
 const testEnv = process.env.NODE_ENV === 'test';
 const https = require('https');
 const axios = require('axios');
+let querystring = require('querystring');
 const xml2js = require('xml2js');
 const { parseNumbers, parseBooleans, } = xml2js.processors;
 const { Duplex, } = require('stream');
@@ -39,7 +40,7 @@ async function fetch(options) {
     var config = {
       method: requestOptions.method,
       url: `https://${requestOptions.hostname}${requestOptions.path}`,
-      data: body || '',
+      data: querystring.stringify(body) || '',
       auth: requestOptions.auth || '',
       headers: requestOptions.headers || '',
       params: requestOptions.params || ''
