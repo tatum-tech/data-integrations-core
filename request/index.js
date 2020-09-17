@@ -1,4 +1,4 @@
-(function (exports, require, module, __filename, __dirname) { 'use strict';
+'use strict';
 
 const testEnv = process.env.NODE_ENV === 'test';
 const helpers = require('../helpers');
@@ -181,4 +181,3 @@ async function parser(options) {
 }
 
 module.exports = parser;
-});
