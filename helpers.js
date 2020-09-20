@@ -35,18 +35,22 @@ async function fetch(options) {
   // let requestTimeout;
 
   try {
-    // let response = [];
+    let data;
+
+    if (requestOptions.headers["Content-Type"] == "application/x-www-form-urlencoded") {
+      data = querystring.stringify(body)
+    } else {
+      data = JSON.stringify(body)
+    }
 
     var config = {
       method: requestOptions.method,
       url: `https://${requestOptions.hostname}${requestOptions.path}`,
-      data: querystring.stringify(body) || '',
+      data: data || '',
       auth: requestOptions.auth || '',
       headers: requestOptions.headers || '',
       params: requestOptions.params || ''
     };
-
-    console.log('config ', config)
 
     return await axios(config)
       .then(function (response) {
