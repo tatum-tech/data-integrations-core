@@ -381,6 +381,11 @@ function getOutputs(options) {
 function processSoftPull(options) {
   let { dataintegration, segment, api_response, responseTraversalPath, } = options;
 
+  responseTraversalPath = responseTraversalPath.reduce((acc, curr) => {
+    acc[ curr.api_name ] = curr.traversalPath;
+    return acc;
+  }, {});
+
   return dataintegration.outputs.reduce((acc, curr) => {
     let { api_name, output_variable, } = curr;
     let value;
