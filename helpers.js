@@ -196,6 +196,7 @@ async function customResponseParser(options) {
   } else {
     api_response = response;
   }
+  // check integration type, then 
   let apiData = getOutputs({ segment, api_response, responseTraversalPath, dataintegration: options.dataintegration });
   return Object.assign({ result: apiData, response, status, });
 }
@@ -222,13 +223,11 @@ function bufferToStream(source) {
  * @return {Object} Returns stream.
  */
 async function decryptSecurityCert(options) {
-  console.log('HERE! - decryptSecurityCert')
   let { filename, dir, Bucket, Key, client_encryption_algo, } = options;
   let otherDocsFolderExists = fs.existsSync(path.join(__dirname, 'otherdocs'));
   const otherdocs = otherDocsFolderExists ? require('./otherdocs') : null;
   const credentials = otherDocsFolderExists ? otherdocs.credentials : null;
   const { accessKeyId, accessKey, region, } = testEnv && otherDocsFolderExists ? credentials.client : periodic.settings.extensions[ 'periodicjs.ext.packagecloud' ].client;
-  console.log('accessKeyId, accessKey, region: ', accessKeyId, accessKey, region)
   const encryption_key = testEnv && otherDocsFolderExists ? credentials.encryption_key_path : periodic.settings.extensions[ '@digifi-los/reactapp' ].encryption_key_path;
   const s3 = new AWS.S3({ accessKeyId, secretAccessKey: accessKey, region, });
   const decipher = crypto.createDecipher(client_encryption_algo, encryption_key);
@@ -360,14 +359,51 @@ function getOutputs(options) {
     acc[ curr.api_name ] = curr.traversalPath;
     return acc;
   }, {});
-  if (dataintegration && dataintegration.vm_parser) {
-    api_response[ 'VMParserResult' ] = VMParser(dataintegration.vm_parser, api_response);
+  // custom parser, by integration type
+  if (dataintegration && dataintegration.data_provider == 'equifax_soft_pull') {
+    return processSoftPull(options)
+  } else {
+    return dataintegration.outputs.reduce((acc, curr) => {
+      try {
+        let { api_name, output_variable, } = curr;
+        let variable = output_variable.title;
+        let value = customTraverse(api_response, responseTraversalPath[ api_name ], curr.arrayConfigs);
+        if (variable) acc[ variable ] = (value !== null && value !== undefined) ? coerceValue({ data_type: curr.data_type, value, }) : null;
+        return acc;
+      } catch (err) {
+        return acc;
+      }
+    }, {});
   }
+  
+}
+
+function processSoftPull(options) {
+  let { dataintegration, segment, api_response, responseTraversalPath, } = options;
+
   return dataintegration.outputs.reduce((acc, curr) => {
+    let { api_name, output_variable, } = curr;
+    let value;
+
     try {
-      let { api_name, output_variable, } = curr;
+      switch (api_name) {
+        case 'total_number_of_bankruptcies':
+          return value = api_response[responseTraversalPath[ api_name ]].length;
+        case 'total_number_of_collections':
+          return value = api_response[responseTraversalPath[ api_name ]].length
+        case 'months_of_credit_history':
+          return value = api_response[responseTraversalPath[ api_name ]];
+        case 'total_credit_inquiries_in_last_12_months': 
+          return value = api_response[responseTraversalPath[ api_name ]].length;
+        case 'number_of_revolving_accounts': 
+          return value = api_response[responseTraversalPath[ api_name ]].length;
+        case 'balance_of_revolving_accounts': 
+          return value = api_response[responseTraversalPath[ api_name ]].length;
+        default:
+          return value = api_response[responseTraversalPath[ api_name ]];
+      }
       let variable = output_variable.title;
-      let value = customTraverse(api_response, responseTraversalPath[ api_name ], curr.arrayConfigs);
+      
       if (variable) acc[ variable ] = (value !== null && value !== undefined) ? coerceValue({ data_type: curr.data_type, value, }) : null;
       return acc;
     } catch (err) {
