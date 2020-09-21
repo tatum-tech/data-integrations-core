@@ -16,6 +16,8 @@ const URL = require('url').URL;
 const urlencode = require('urlencode');
 const path = require('path');
 const moment = require('moment');
+const flat = require('flat');
+const unflatten = require('flat').unflatten;
 const VMParser = require('./parser');
 
 /**
@@ -388,24 +390,27 @@ function processSoftPull(options) {
 
   return dataintegration.outputs.reduce((acc, curr) => {
     let { api_name, output_variable, } = curr;
-    let value;
+    let value = api_response[responseTraversalPath[api_name]];
 
     try {
+      flat_api_response = flat(api_response)
+
       switch (api_name) {
         case 'total_number_of_bankruptcies':
-          return value = api_response[responseTraversalPath[api_name]].length;
+          data = flat_api_response[responseTraversalPath.api_name]
+          value = data.length;
         case 'total_number_of_collections':
-          return value = api_response[responseTraversalPath[api_name]].length
+          value = flat_api_response[responseTraversalPath.api_name].length
         case 'months_of_credit_history':
-          return value = api_response[responseTraversalPath[api_name]];
+          value = flat_api_response[responseTraversalPath.api_name];
         case 'total_credit_inquiries_in_last_12_months': 
-          return value = api_response[responseTraversalPath[api_name]].length;
+          value = flat_api_response[responseTraversalPath.api_name].length;
         case 'number_of_revolving_accounts': 
-          return value = api_response[responseTraversalPath[api_name]].length;
+          value = flat_api_response[responseTraversalPath.api_name].length;
         case 'balance_of_revolving_accounts': 
-          return value = api_response[responseTraversalPath[api_name]].length;
+          value = flat_api_response[responseTraversalPath.api_name].length;
         default:
-          return value = api_response[responseTraversalPath[api_name]];
+          value = flat_api_response[responseTraversalPath.api_name];
       }
       let variable = output_variable.title;
       
