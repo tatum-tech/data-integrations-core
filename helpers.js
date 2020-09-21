@@ -393,11 +393,11 @@ function processSoftPull(options) {
     let value = api_response[responseTraversalPath[api_name]];
 
     try {
-      let flat_api_response = flat(api_response)
+      let flat_api_response = flat(api_response, { maxDepth: 4 })
 
       switch (api_name) {
         case 'total_number_of_bankruptcies':
-          data = flat_api_response[responseTraversalPath[ api_name ]]
+          let data = flat_api_response[responseTraversalPath[ api_name ]]
           value = data.length;
         case 'total_number_of_collections':
           value = flat_api_response[responseTraversalPath[ api_name ]].length
