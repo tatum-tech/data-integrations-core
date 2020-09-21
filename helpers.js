@@ -393,19 +393,19 @@ function processSoftPull(options) {
     try {
       switch (api_name) {
         case 'total_number_of_bankruptcies':
-          return value = api_response[responseTraversalPath[ api_name ]].length;
+          return value = api_response[responseTraversalPath[api_name]].length;
         case 'total_number_of_collections':
-          return value = api_response[responseTraversalPath[ api_name ]].length
+          return value = api_response[responseTraversalPath[api_name]].length
         case 'months_of_credit_history':
-          return value = api_response[responseTraversalPath[ api_name ]];
+          return value = api_response[responseTraversalPath[api_name]];
         case 'total_credit_inquiries_in_last_12_months': 
-          return value = api_response[responseTraversalPath[ api_name ]].length;
+          return value = api_response[responseTraversalPath[api_name]].length;
         case 'number_of_revolving_accounts': 
-          return value = api_response[responseTraversalPath[ api_name ]].length;
+          return value = api_response[responseTraversalPath[api_name]].length;
         case 'balance_of_revolving_accounts': 
-          return value = api_response[responseTraversalPath[ api_name ]].length;
+          return value = api_response[responseTraversalPath[api_name]].length;
         default:
-          return value = api_response[responseTraversalPath[ api_name ]];
+          return value = api_response[responseTraversalPath[api_name]];
       }
       let variable = output_variable.title;
       
