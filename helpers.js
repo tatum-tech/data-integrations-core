@@ -20,6 +20,7 @@ const flat = require('flat');
 const unflatten = require('flat').unflatten;
 const VMParser = require('./parser');
 const { processSoftPull } = require('./vendors/equifax')
+const { processExperianCreditReport } = require('./vendors/experian')
 
 /**
  * Fetch method.
@@ -335,6 +336,9 @@ function getOutputs(options) {
   // custom parser, by integration type
   if (dataintegration && dataintegration.data_provider == 'equifax_soft_pull') {
     return processSoftPull(options)
+  } 
+  else if (dataintegration && dataintegration.data_provider == 'experian_credit_report') {
+    return processExperianCreditReport(options)
   } else {
     return dataintegration.outputs.reduce((acc, curr) => {
       try {
