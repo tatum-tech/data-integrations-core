@@ -337,7 +337,7 @@ function getOutputs(options) {
   if (dataintegration && dataintegration.data_provider == 'equifax_soft_pull') {
     return processSoftPull(options)
   } 
-  else if (dataintegration && dataintegration.data_provider == 'experian_credit_report') {
+  else if (dataintegration && dataintegration.data_provider == 'experian_prequalification_credit_report') {
     return processExperianCreditReport(options)
   } else {
     return dataintegration.outputs.reduce((acc, curr) => {

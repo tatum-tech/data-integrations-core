@@ -1,3 +1,6 @@
+const flat = require('flat');
+const unflatten = require('flat').unflatten;
+
 function processExperianCreditReport(options) {
     let { dataintegration, segment, api_response, responseTraversalPath, } = options;
   
