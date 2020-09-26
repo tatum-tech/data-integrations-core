@@ -428,4 +428,5 @@ module.exports = {
   traverse,
   bufferToStream,
   changeRequestOptionsByInputs,
+  coerceValue,
 };

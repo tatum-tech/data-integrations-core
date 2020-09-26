@@ -1,5 +1,6 @@
 const flat = require('flat');
 const unflatten = require('flat').unflatten;
+const helpers = require('../helpers');
 
 function processExperianCreditReport(options) {
     let { dataintegration, segment, api_response, responseTraversalPath, } = options;
@@ -26,7 +27,7 @@ function processExperianCreditReport(options) {
         
         let variable = output_variable.title;
         
-        if (variable) acc[ variable ] = (value !== null && value !== undefined) ? coerceValue({ data_type: curr.data_type, value, }) : null;
+        if (variable) acc[ variable ] = (value !== null && value !== undefined) ? helpers.coerceValue({ data_type: curr.data_type, value, }) : null;
         return acc;
       } catch (err) {
         return acc;
