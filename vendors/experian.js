@@ -16,7 +16,7 @@ function processExperianCreditReport(options) {
       let value = api_response[responseTraversalPath[api_name]];
   
       try {
-        if (responseTraversalPath[ api_name ].length > 0) {
+        if (flat_api_response[responseTraversalPath[ api_name ]].length > 0) {
           let data = flat_api_response[responseTraversalPath[ api_name ]].find(attributes => attributes.id == api_name )
           value = data.value;
         } else {
